@@ -7,9 +7,7 @@ program GPSLocating
     real(dp), allocatable :: v_QC1(:), v_QC2(:), v_QC3(:), v_d(:)
     real(dp) :: v_m(3)
     real(dp), allocatable :: m_Q(:,:), m_QT(:,:)
-
     real(dp) :: m_QTQ(3, 3), m_QTQ_INVERSE(3, 3)
-    ! real(dp) :: v_RHS()
 
     ! Prompt user for the number of stations
     print *, 'Enter the number of stations (N >= 4):'
@@ -23,7 +21,7 @@ program GPSLocating
     allocate(v_QC1(N), v_QC2(N), v_QC3(N), v_d(N))
 
     ! Input station coorv_dnates and v_dstances
-    print *, 'Enter the coorv_dnates (v_QC1, v_QC2, v_QC3) and v_dstance v_d for each station:'
+    print *, 'Enter the coordinates (v_QC1, v_QC2, v_QC3) and stance v_d for each station:'
     do i = 1, N
         print *, 'Station ', i, ':'
         read *, v_QC1(i), v_QC2(i), v_QC3(i), v_d(i)
