@@ -7,9 +7,8 @@
             "command": "gfortran",
             "args": [
                 "-o",
-                "LinearRegressionPlotting",
-                "LinearRegressionPlotting.f90",
-                "LinearRegressionFitting.f90",
+                "GPSLocating",
+                "GPSLocating.f90",
                 "InverseMatrix.f90",
                 // "locpt.f90",
                 "-I/usr/local/anaconda3/envs/FORTRAN/include",

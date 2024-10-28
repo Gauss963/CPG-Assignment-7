@@ -3,15 +3,13 @@ program GPSLocating
     implicit none
 
     integer, parameter :: dp = real64
-    integer :: N, i, j, k
-    real(dp), allocatable :: v_QC1(:), v_QC2(:), v_QC3(:), v_d(:), v_m(:)
+    integer :: N, i, j, k, INFO
+    real(dp), allocatable :: v_QC1(:), v_QC2(:), v_QC3(:), v_d(:)
+    real(dp) :: v_m(3)
     real(dp), allocatable :: m_Q(:,:), m_QT(:,:)
 
-    real(dp) :: m_QTQ(3, 3), m_QTQ_INVERSE
-    real(dp) :: v_RHS()
-
-    ! For LAPACK routine DGELS
-    external :: DGELS
+    real(dp) :: m_QTQ(3, 3), m_QTQ_INVERSE(3, 3)
+    ! real(dp) :: v_RHS()
 
     ! Prompt user for the number of stations
     print *, 'Enter the number of stations (N >= 4):'
@@ -22,7 +20,7 @@ program GPSLocating
     end if
 
     ! Allocate arrays
-    allocate(v_QC1(N), v_QC2(N), v_QC3(N), v_d(N), v_m(N))
+    allocate(v_QC1(N), v_QC2(N), v_QC3(N), v_d(N))
 
     ! Input station coorv_dnates and v_dstances
     print *, 'Enter the coorv_dnates (v_QC1, v_QC2, v_QC3) and v_dstance v_d for each station:'
@@ -48,7 +46,7 @@ program GPSLocating
     m_QT = transpose(m_Q)
     m_QTQ = matmul(m_QT, m_Q)
     call matrix_inverse(3, m_QTQ, m_QTQ_INVERSE, INFO)
-    v_m = matmul(matmul(m_QTQ_INVERSE, m_QT), v_d)
+    v_m = matmul(m_QTQ_INVERSE, matmul(m_QT, v_d))
 
 
     ! Output the result
@@ -59,7 +57,7 @@ program GPSLocating
 
 
 
-    deallocate(v_QC1, v_QC2, v_QC3, v_d, v_m)
+    deallocate(v_QC1, v_QC2, v_QC3, v_d)
     deallocate(m_Q)
 
 end program GPSLocating
