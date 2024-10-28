@@ -7,8 +7,8 @@
             "command": "gfortran",
             "args": [
                 "-o",
-                "GPSLocating",
-                "GPSLocating.f90",
+                "InverseTest",
+                "InverseTest.f90",
                 "InverseMatrix.f90",
                 // "locpt.f90",
                 "-I/usr/local/anaconda3/envs/FORTRAN/include",
