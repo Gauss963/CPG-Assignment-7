@@ -1,0 +1,31 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Fortran",
+            "type": "shell",
+            "command": "gfortran",
+            "args": [
+                "-o",
+                "LinearRegressionPlotting",
+                "LinearRegressionPlotting.f90",
+                "LinearRegressionFitting.f90",
+                "InverseMatrix.f90",
+                // "locpt.f90",
+                "-I/usr/local/anaconda3/envs/FORTRAN/include",
+                "-L/usr/local/anaconda3/envs/FORTRAN/lib",
+                "-lpgplot",
+                "-lcpgplot",
+                "-llapack",
+                "-lblas",
+                "-lX11",
+                "-Wl,-rpath,/usr/local/anaconda3/envs/FORTRAN/lib"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}
