@@ -7,8 +7,8 @@
             "command": "gfortran",
             "args": [
                 "-o",
-                "GetTravelTime",
-                "GetTravelTime.f90",
+                "GPSLocating",
+                "GPSLocating.f90",
                 "delaz.f90",
                 "CountLines.f90",
                 "InverseMatrix.f90",

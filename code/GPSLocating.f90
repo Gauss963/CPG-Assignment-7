@@ -5,7 +5,7 @@ program GPSLocating
     implicit none
 
     integer, parameter :: dp = real64
-    integer :: N, i, j, k, l, m, INFO, o
+    integer :: N, i, j, k, l, m, INFO, o, tg_num
     
     
     real(dp), allocatable :: v_QC1(:), v_QC2(:), v_QC3(:), v_d(:), v_d_FIXED(:)
@@ -26,22 +26,25 @@ program GPSLocating
     real, allocatable :: STATION_X(:), STATION_Y(:), STATION_Z(:)
     real :: lat_deg, lat_min, lon_deg, lon_min
     integer :: io_status, unit_num
+
+
+    real, allocatable :: TRAVEL_DIST(:), TRAVEL_TIMES(:)
+    character(len = 4), allocatable :: STA_TG_CODES(:)
+    real :: a, b, sdv, R, std_a, std_b
+
+    real :: xsec
+    integer iy, im, id, ih, mm
     
     
-    
-    
-    
-    
-    data_filename = "../data/nsta.dat"
     velocity = 7 ! km/s
 
 
     ! Count the number of lines.
-    call CountLines(data_filename, o)
+    call CountLines("../data/nsta.dat", o)
     allocate(STATION_X(o), STATION_Y(o), STATION_Z(o))
 
     ! Read data (lat, lon, elev)
-    open(newunit=unit_num, file = data_filename, status = "old", action = "read")
+    open(newunit=unit_num, file = "../data/nsta.dat", status = "old", action = "read")
     do i = 1, m
         read(unit_num, '(A)', iostat=io_status) line
         if (io_status /= 0) exit
@@ -66,6 +69,27 @@ program GPSLocating
         end if
     end do
     close(unit_num)
+
+
+
+
+    call CountLines("../data/ppfile.txt", tg_num)
+    
+    tg_num = tg_num - 1
+
+    allocate(TRAVEL_DIST(tg_num), TRAVEL_TIMES(tg_num), STA_TG_CODES(tg_num))
+
+    open(newunit=unit_num, file = "../data/ppfile.txt", status = "old", action = "read")
+    rewind(unit_num)
+
+    read(unit_num,'(1x, i4, 4i2, f6.2)') iy, im, id, ih, mm, xsec
+    xsec = mm * 60.0 + xsec
+    do i = 1, tg_num
+        read(unit_num,'(A4, f6.1, 9x, i3, f6.2)') STA_TG_CODES(i), TRAVEL_DIST(i), mm, TRAVEL_TIMES(i)
+        TRAVEL_TIMES(i) = mm * 60.0 + TRAVEL_TIMES(i) - xsec
+    end do
+    close(unit_num)
+    print *, STA_TG_CODES
 
 
 
