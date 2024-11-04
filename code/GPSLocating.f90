@@ -21,15 +21,16 @@ program GPSLocating
     ! real(dp) :: m_QTQ(4, 4), m_QTQ_INVERSE(4, 4)
 
 
-    character(len = 100) :: line, elev_str, lat_str, lon_str
+    character(len = 100) :: line, elev_str, lat_str, lon_str, code_str
     character(len = 100) :: data_filename
     real, allocatable :: STATION_X(:), STATION_Y(:), STATION_Z(:)
+    real, allocatable :: STATION_TG_X(:), STATION_TG_Y(:)
     real :: lat_deg, lat_min, lon_deg, lon_min
     integer :: io_status, unit_num
 
 
     real, allocatable :: TRAVEL_DIST(:), TRAVEL_TIMES(:)
-    character(len = 4), allocatable :: STA_TG_CODES(:)
+    character(len = 4), allocatable :: STA_CODES(:), STA_TG_CODES(:)
     real :: a, b, sdv, R, std_a, std_b
 
     real :: xsec
@@ -41,13 +42,15 @@ program GPSLocating
 
     ! Count the number of lines.
     call CountLines("../data/nsta.dat", o)
-    allocate(STATION_X(o), STATION_Y(o), STATION_Z(o))
+    allocate(STATION_X(o), STATION_Y(o), STATION_Z(o), STA_CODES(o))
 
     ! Read data (lat, lon, elev)
     open(newunit=unit_num, file = "../data/nsta.dat", status = "old", action = "read")
     do i = 1, m
         read(unit_num, '(A)', iostat=io_status) line
         if (io_status /= 0) exit
+
+        read(line(1:4), *) STA_CODES(i)
 
         lat_str = line(5:13)
         read(lat_str(1:2), *) lat_deg
@@ -78,6 +81,7 @@ program GPSLocating
     tg_num = tg_num - 1
 
     allocate(TRAVEL_DIST(tg_num), TRAVEL_TIMES(tg_num), STA_TG_CODES(tg_num))
+    allocate(STATION_TG_X(tg_num), STATION_TG_Y(tg_num))
 
     open(newunit=unit_num, file = "../data/ppfile.txt", status = "old", action = "read")
     rewind(unit_num)
@@ -85,11 +89,38 @@ program GPSLocating
     read(unit_num,'(1x, i4, 4i2, f6.2)') iy, im, id, ih, mm, xsec
     xsec = mm * 60.0 + xsec
     do i = 1, tg_num
-        read(unit_num,'(A4, f6.1, 9x, i3, f6.2)') STA_TG_CODES(i), TRAVEL_DIST(i), mm, TRAVEL_TIMES(i)
+        read(unit_num,'(A5, f6.1, 9x, i3, f6.2)') STA_TG_CODES(i), TRAVEL_DIST(i), mm, TRAVEL_TIMES(i)
         TRAVEL_TIMES(i) = mm * 60.0 + TRAVEL_TIMES(i) - xsec
     end do
     close(unit_num)
-    print *, STA_TG_CODES
+
+    ! This is r vector (column vector)
+    TRAVEL_DIST = TRAVEL_TIMES * velocity
+
+    print *, TRAVEL_DIST
+
+
+    do i = 1, size(STA_TG_CODES)
+
+        do j = 1, size(STA_CODES)
+
+            if (ADJUSTL(TRIM(STA_TG_CODES(i))) == ADJUSTL(TRIM(STA_CODES(j)))) then
+                STATION_TG_X(i) = STATION_X(j)
+                STATION_TG_Y(i) = STATION_Y(j)
+                print *, "Mapping successed", i
+                goto 43
+            end if
+        end do
+43      print *, "Next station"
+    end do
+
+    ! print *, STATION_TG_X, STATION_TG_Y
+
+    v_location = [120, 24, -10]
+
+
+    ! call delaz(121.5, 24.3, 121.8, 24.8, kx, ky, kd)
+    ! print *, kx, ky, kd
 
 
 
@@ -99,8 +130,6 @@ program GPSLocating
 
 
 
-
-    v_location = [20, 20, 20]
 
     ! Prompt user for the number of stations
     print *, 'Enter the number of stations (N >= 4):'

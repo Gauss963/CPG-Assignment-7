@@ -24,3 +24,4 @@ if (trim(elev_str) == '') then
 else
     read(elev_str, *) STATION_Z(i)
 end if
+
