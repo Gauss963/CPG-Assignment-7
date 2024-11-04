@@ -116,16 +116,6 @@ program GPSLocating
     end do
 
 
-
-
-
-
-
-
-
-
-
-
     print *, 'Exceed iteration limit (1000)'
     print *, ''
 
