@@ -7,11 +7,8 @@
             "command": "gfortran",
             "args": [
                 "-o",
-                "ReadNsta",
-                "ReadNsta.f90",
-                // "GPSLocating.f90",
-                // "GetTravelTime.f90",
-                // "matinv.f90",
+                "GetTravelTime",
+                "GetTravelTime.f90",
                 "delaz.f90",
                 "CountLines.f90",
                 "InverseMatrix.f90",
