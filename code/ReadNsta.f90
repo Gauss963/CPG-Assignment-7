@@ -18,7 +18,7 @@
     allocate(STATION_X(m), STATION_Y(m), STATION_Z(m))
 
 
-    ! Read data (lat, lon)
+    ! Read data (lat, lon, elev)
     open(newunit=unit_num, file = data_filename, status = "old", action = "read")
     do i = 1, m
         read(unit_num, '(A)', iostat=io_status) line
@@ -36,13 +36,12 @@
 
         STATION_X(i) = lon_deg + lon_min / 60.0
 
-        ! elev_str = line(24:28)
-        ! if (trim(elev_str) == '') then
-        !     EQ_Z(i) = 0.0
-        ! else
-        !     read(elev_str, *) EQ_Z(i)
-        ! end if
-
+        elev_str = line(22:28)
+        if (trim(elev_str) == '') then
+            STATION_Z(i) = 0.0
+        else
+            read(elev_str, *) STATION_Z(i)
+        end if
     end do
     close(unit_num)
 
