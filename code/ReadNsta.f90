@@ -7,6 +7,8 @@
     integer :: io_status, unit_num
 
     real, allocatable :: STATION_X(:), STATION_Y(:), STATION_Z(:)
+    real, allocatable :: TRAVEL_TIME(:)
+    
     real :: lat_deg, lat_min, lon_deg, lon_min
 
 
