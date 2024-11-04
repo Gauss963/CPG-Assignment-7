@@ -12,6 +12,7 @@ program GPSLocating
     real(dp) :: v_m(3), v_location(3)
     real(dp), allocatable :: m_Q(:,:), m_QT(:,:), m_Q_FIXED(:,:)
     real(dp) :: m_QTQ(3, 3), m_QTQ_INVERSE(3, 3)
+    real(dp) :: velocity
 
 
     ! real(dp), allocatable :: v_QC1(:), v_QC2(:), v_QC3(:), v_d(:), v_d_FIXED(:)
@@ -32,6 +33,7 @@ program GPSLocating
     
     
     data_filename = "../data/nsta.dat"
+    velocity = 7 ! km/s
 
 
     ! Count the number of lines.
@@ -100,7 +102,7 @@ program GPSLocating
 
     allocate(m_Q(N, 3), m_QT(3, N), m_Q_FIXED(N, 3))
     do j = 1, N
-        m_Q(j, 1) = v_QC1(j) ! (column, row) => (1, j) -> v_QC1(j)
+        m_Q(j, 1) = v_QC1(j) ! (column, row) => (j, 1) -> v_QC1(j)
         m_Q(j, 2) = v_QC2(j) ! Since FORTRAN is column-major
         m_Q(j, 3) = v_QC3(j) ! See `https://en.wikipedia.org/wiki/Row-_and_column-major_order`
 

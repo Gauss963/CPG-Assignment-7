@@ -11,6 +11,8 @@
     
     real :: lat_deg, lat_min, lon_deg, lon_min
 
+    real :: kx, ky, kd
+
 
     data_filename = "../data/nsta.dat"
 
@@ -48,6 +50,12 @@
     close(unit_num)
 
     
+    
+    
+    
+    
+    call delaz(121.5, 24.3, 121.8, 24.8, kx, ky, kd)
+    print *, kx, ky, kd
 
 
 
