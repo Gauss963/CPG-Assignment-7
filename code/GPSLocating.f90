@@ -4,17 +4,18 @@ program GPSLocating
 
     integer, parameter :: dp = real64
     integer :: N, i, j, k, l, m, INFO
+    
+    
+    ! real(dp), allocatable :: v_QC1(:), v_QC2(:), v_QC3(:), v_d(:), v_d_FIXED(:)
+    ! real(dp) :: v_m(3), v_location(3)
+    ! real(dp), allocatable :: m_Q(:,:), m_QT(:,:), m_Q_FIXED(:,:)
+    ! real(dp) :: m_QTQ(3, 3), m_QTQ_INVERSE(3, 3)
+
+
     real(dp), allocatable :: v_QC1(:), v_QC2(:), v_QC3(:), v_d(:), v_d_FIXED(:)
-    real(dp) :: v_m(3), v_location(3)
+    real(dp) :: v_m(4), v_location(4)
     real(dp), allocatable :: m_Q(:,:), m_QT(:,:), m_Q_FIXED(:,:)
-
-    real(dp) :: m_QTQ(3, 3), m_QTQ_INVERSE(3, 3)
-
-    ! real, allocatable :: v_QC1(:), v_QC2(:), v_QC3(:), v_d(:), v_d_FIXED(:)
-    ! real :: v_m(3), v_location(3)
-    ! real, allocatable :: m_Q(:,:), m_QT(:,:), m_Q_FIXED(:,:)
-
-    ! real :: m_QTQ(3, 3), m_QTQ_INVERSE(3, 3)
+    real(dp) :: m_QTQ(4, 4), m_QTQ_INVERSE(4, 4)
 
     v_location = [20, 20, 20]
 
