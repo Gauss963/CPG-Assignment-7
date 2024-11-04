@@ -1,6 +1,6 @@
  program ReadNsta
     implicit none
-    character(len = 100) :: line, elev_str, lat_str, lon_str
+    character(len = 100) :: sta_code, line, elev_str, lat_str, lon_str
     character(len = 100) :: data_filename
     
     integer :: n, m, i
@@ -8,6 +8,7 @@
 
     real, allocatable :: STATION_X(:), STATION_Y(:), STATION_Z(:)
     real, allocatable :: TRAVEL_TIME(:)
+    character(len = 4), allocatable :: STA_CODES(:)
     
     real :: lat_deg, lat_min, lon_deg, lon_min
 
@@ -19,7 +20,8 @@
 
     ! Count the number of lines.
     call CountLines(data_filename, m)
-    allocate(STATION_X(m), STATION_Y(m), STATION_Z(m))
+    allocate(STATION_X(m), STATION_Y(m), STATION_Z(m), STA_CODES(m))
+
 
 
     ! Read data (lat, lon, elev)
@@ -27,6 +29,10 @@
     do i = 1, m
         read(unit_num, '(A)', iostat=io_status) line
         if (io_status /= 0) exit
+
+        ! STA_CODES(i) = line(1:3)
+        read(line(1:4), *) STA_CODES(i)
+
 
         lat_str = line(5:13)
         read(lat_str(1:2), *) lat_deg
@@ -39,18 +45,12 @@
         read(lon_str(4:8), *) lon_min
 
         STATION_X(i) = lon_deg + lon_min / 60.0
-
-        elev_str = line(22:28)
-        if (trim(elev_str) == '') then
-            STATION_Z(i) = 0.0
-        else
-            read(elev_str, *) STATION_Z(i)
-        end if
     end do
     close(unit_num)
+    
 
-    
-    
+    print *, size(STA_CODES)
+    print *, STA_CODES(size(STA_CODES))
     
     
     
