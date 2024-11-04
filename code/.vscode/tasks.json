@@ -11,7 +11,7 @@
                 "GPSLocating.f90",
                 "delaz.f90",
                 "CountLines.f90",
-                "InverseMatrix.f90",
+                "matinv.f90",
                 "-I/usr/local/anaconda3/envs/FORTRAN/include",
                 "-L/usr/local/anaconda3/envs/FORTRAN/lib",
                 "-lpgplot",

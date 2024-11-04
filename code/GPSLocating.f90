@@ -5,39 +5,41 @@ program GPSLocating
     implicit none
 
     integer, parameter :: dp = real64
-    integer :: N, i, j, k, l, m, INFO, o, tg_num
-    
-    
-    real(dp), allocatable :: v_QC1(:), v_QC2(:), v_QC3(:), v_d(:), v_d_FIXED(:)
-    real(dp) :: v_m(3), v_location(3)
-    real(dp), allocatable :: m_Q(:,:), m_QT(:,:), m_Q_FIXED(:,:)
-    real(dp) :: m_QTQ(3, 3), m_QTQ_INVERSE(3, 3)
-    real(dp) :: velocity
+    integer :: N, i, j, k, l, m, INFO, o, tg_num, y
 
 
-    ! real(dp), allocatable :: v_QC1(:), v_QC2(:), v_QC3(:), v_d(:), v_d_FIXED(:)
-    ! real(dp) :: v_m(4), v_location(4)
-    ! real(dp), allocatable :: m_Q(:,:), m_QT(:,:), m_Q_FIXED(:,:)
-    ! real(dp) :: m_QTQ(4, 4), m_QTQ_INVERSE(4, 4)
+    real, allocatable :: v_QC1(:), v_QC2(:), v_QC3(:), v_d(:), v_d_FIXED(:)
+    real :: v_m(4), location(4)
+    real, allocatable :: m_Q(:,:), m_QT(:,:), m_Q_FIXED(:,:)
+    real :: m_QTQ(4, 4), m_QTQ_INVERSE(4, 4)
 
 
     character(len = 100) :: line, elev_str, lat_str, lon_str, code_str
     character(len = 100) :: data_filename
     real, allocatable :: STATION_X(:), STATION_Y(:), STATION_Z(:)
-    real, allocatable :: STATION_TG_X(:), STATION_TG_Y(:)
+    real, allocatable :: STATION_TG_X(:), STATION_TG_Y(:), STATION_TG_Z(:)
     real :: lat_deg, lat_min, lon_deg, lon_min
     integer :: io_status, unit_num
 
 
-    real, allocatable :: TRAVEL_DIST(:), TRAVEL_TIMES(:)
+    real, allocatable :: TRAVEL_DIST(:), ARRIVAL_TIMES(:)
     character(len = 4), allocatable :: STA_CODES(:), STA_TG_CODES(:)
     real :: a, b, sdv, R, std_a, std_b
 
     real :: xsec
     integer iy, im, id, ih, mm
+    real :: velocity
+    real :: kx, ky, kd
+    real :: rx, ry, rz, rt
+    real :: kx_guess, ky_guess, kz_guess
     
     
     velocity = 7 ! km/s
+
+
+
+
+
 
 
     ! Count the number of lines.
@@ -80,8 +82,9 @@ program GPSLocating
     
     tg_num = tg_num - 1
 
-    allocate(TRAVEL_DIST(tg_num), TRAVEL_TIMES(tg_num), STA_TG_CODES(tg_num))
-    allocate(STATION_TG_X(tg_num), STATION_TG_Y(tg_num))
+    allocate(TRAVEL_DIST(tg_num), ARRIVAL_TIMES(tg_num), STA_TG_CODES(tg_num))
+    allocate(STATION_TG_X(tg_num), STATION_TG_Y(tg_num), STATION_TG_Z(tg_num))
+    allocate(v_d(tg_num))
 
     open(newunit=unit_num, file = "../data/ppfile.txt", status = "old", action = "read")
     rewind(unit_num)
@@ -89,15 +92,10 @@ program GPSLocating
     read(unit_num,'(1x, i4, 4i2, f6.2)') iy, im, id, ih, mm, xsec
     xsec = mm * 60.0 + xsec
     do i = 1, tg_num
-        read(unit_num,'(A5, f6.1, 9x, i3, f6.2)') STA_TG_CODES(i), TRAVEL_DIST(i), mm, TRAVEL_TIMES(i)
-        TRAVEL_TIMES(i) = mm * 60.0 + TRAVEL_TIMES(i) - xsec
+        read(unit_num,'(A5, f6.1, 9x, i3, f6.2)') STA_TG_CODES(i), TRAVEL_DIST(i), mm, ARRIVAL_TIMES(i)
+        ! ARRIVAL_TIMES(i) = mm * 60.0 + ARRIVAL_TIMES(i)
     end do
     close(unit_num)
-
-    ! This is r vector (column vector)
-    TRAVEL_DIST = TRAVEL_TIMES * velocity
-
-    print *, TRAVEL_DIST
 
 
     do i = 1, size(STA_TG_CODES)
@@ -107,122 +105,59 @@ program GPSLocating
             if (ADJUSTL(TRIM(STA_TG_CODES(i))) == ADJUSTL(TRIM(STA_CODES(j)))) then
                 STATION_TG_X(i) = STATION_X(j)
                 STATION_TG_Y(i) = STATION_Y(j)
-                print *, "Mapping successed", i
+                STATION_TG_Z(i) = STATION_Z(j)
                 goto 43
             end if
         end do
-43      print *, "Next station"
-    end do
-
-    ! print *, STATION_TG_X, STATION_TG_Y
-
-    v_location = [120, 24, -10]
-
-
-    ! call delaz(121.5, 24.3, 121.8, 24.8, kx, ky, kd)
-    ! print *, kx, ky, kd
-
-
-
-
-
-
-
-
-
-
-    ! Prompt user for the number of stations
-    print *, 'Enter the number of stations (N >= 4):'
-    read *, N
-    if (N < 4) then
-        print *, 'At least 4 stations are required.'
-        stop
-    end if
-    allocate(v_QC1(N), v_QC2(N), v_QC3(N), v_d(N))
-
-
-    ! Input station coordinates and dstance
-    print *, 'Enter the coordinates (v_QC1, v_QC2, v_QC3) and dstance v_d for each station:'
-    do i = 1, N
-        print *, 'Station ', i, ':'
-        read *, v_QC1(i), v_QC2(i), v_QC3(i), v_d(i)
-    end do
-
-
-    v_d_FIXED = v_d
-    ! print *, 'd_FIXED is', v_d_FIXED
-
-
-    allocate(m_Q(N, 3), m_QT(3, N), m_Q_FIXED(N, 3))
-    do j = 1, N
-        m_Q(j, 1) = v_QC1(j) ! (column, row) => (j, 1) -> v_QC1(j)
-        m_Q(j, 2) = v_QC2(j) ! Since FORTRAN is column-major
-        m_Q(j, 3) = v_QC3(j) ! See `https://en.wikipedia.org/wiki/Row-_and_column-major_order`
-
-        m_Q_FIXED(j, 1) = v_QC1(j)
-        m_Q_FIXED(j, 2) = v_QC2(j)
-        m_Q_FIXED(j, 3) = v_QC3(j)
-    end do
-    ! Q FIXED initialized here. Print the matrix to check
-    print *, 'Matrix Q FIXED:'
-    do k = 1, N
-        print *, m_Q_FIXED(k, 1), m_Q_FIXED(k, 2), m_Q_FIXED(k, 3)
+43      print *, i, "is done, next station"
     end do
 
 
 
-    do i = 1, 1000
-        
-        ! Update matrix Q
-        do j = 1, N
-            do k = 1, 3
-                m_Q(j, k) = v_location(k) - m_Q_FIXED(j, k)
-            end do
+
+
+
+    allocate(m_Q(tg_num, 4), m_QT(4, tg_num), m_Q_FIXED(tg_num, 4))
+
+    ! location = [121, 25, -10, 0]
+    location = [0, 0, 10, 0] ! 121, 24
+
+    print *, ARRIVAL_TIMES
+
+    do y = 1, 1000
+
+        do i = 1, tg_num
+            ! call delaz(24, 121, location(2), location(1), kx_guess, ky_guess, kz_guess)
+            call delaz(24.0, 121.0, STATION_TG_Y(i), STATION_TG_X(i), kx, ky, kd)
+
+            ! Update vector d
+            rx = (kx - location(1))
+            ry = (ky - location(2))
+            rz = (-STATION_TG_Z(i) / 1000 - location(3))
+            rt = ( ARRIVAL_TIMES(i) - location(4))
+            v_d(i) = 0.5 * (rx**2 + ry**2 + rz**2 - velocity**2 * rt**2)
+            ! Update matrix Q
+            m_Q(i, 1) = rx
+            m_Q(i, 2) = ry
+            m_Q(i, 3) = rz
+            m_Q(i, 4) = -velocity**2 * rt
         end do
-
-        ! Update vector d
-        do m = 1, N
-            v_d(m) = v_d_FIXED(m)**2 - ( m_Q_FIXED(m, 1) - v_location(1) )**2 &
-                                     - ( m_Q_FIXED(m, 2) - v_location(2) )**2 &
-                                     - ( m_Q_FIXED(m, 3) - v_location(3) )**2
-            
-            v_d(m) = v_d(m) * 0.5
-        end do
-        ! print *, 'vector d = ', v_d
-        ! print *, '---------------------------------------------------------------'
-
-        ! print *, 'Matrix Q:'
-        ! do k = 1, N
-        !     print *, m_Q(k, 1), m_Q(k, 2), m_Q(k, 3)
-        ! end do
-
-
-
         ! Solve linear system
         m_QT = transpose(m_Q)
         m_QTQ = matmul(m_QT, m_Q)
-        
-        call matrix_inverse(3, m_QTQ, m_QTQ_INVERSE, INFO)
-        v_m = matmul(matmul(m_QTQ_INVERSE, m_QT), v_d)
-        
-        
-        ! call MATRIXINV(m_QTQ, 3)
-        ! v_m = matmul(matmul(m_QTQ, m_QT), v_d)
-        
-        v_location = v_location + v_m
+        call MATRIXINV(m_QTQ, 4)
+        v_m = matmul(matmul(m_QTQ, m_QT), v_d)
+        location = location + v_m
 
-        ! print *, 'vector m = ', v_m
-
-
-
+        print *, v_m
 
         ! Check if \delta x, \delta y, \delta z \leq 10e-6
-        if (abs(v_m(1)) < 10e-6 .AND. & 
-            abs(v_m(2)) < 10e-6 .AND. &
-            abs(v_m(3)) < 10e-6) then
-            print *, 'Number of iteration is', i
-            goto 42
-        end if
+        ! if (abs(v_m(1)) < 10e-6 .AND. & 
+        !     abs(v_m(2)) < 10e-6 .AND. &
+        !     abs(v_m(3)) < 10e-6) then
+        !     print *, 'Number of iteration is', i
+        !     goto 42
+        ! end if
 
 
     end do
@@ -233,9 +168,10 @@ program GPSLocating
 
     ! Output the result
 42  print *, 'The estimated coordinates of the target point are:'
-    print *, 'X = ', v_location(1)
-    print *, 'Y = ', v_location(2)
-    print *, 'Z = ', v_location(3)
+    print *, 'X = ', location(1)
+    print *, 'Y = ', location(2)
+    print *, 'Z = ', location(3)
+    print *, 'T = ', location(4)
 
     print *, 'The errors are:'
     print *, 'delta x = ', v_m(1)
@@ -243,7 +179,7 @@ program GPSLocating
     print *, 'delta z = ', v_m(3)
 
 
-    deallocate(v_QC1, v_QC2, v_QC3, v_d)
+    deallocate(v_d)
     deallocate(m_Q)
 
 end program GPSLocating

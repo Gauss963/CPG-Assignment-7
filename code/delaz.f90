@@ -1,8 +1,7 @@
 subroutine delaz(elat, elon, slat, slon, dx, dy, delta)
     
-    ! implicit none
-    ! integer, parameter :: dp = real64
-    ! real(dp) :: elat, elon, slat, slon, dx, dy, delta, a, b, dlat, dlon, avlat
+    implicit none
+    real:: elat, elon, slat, slon, dx, dy, delta, a, b, dlat, dlon, avlat
 
 
     avlat = 0.5 * (elat + slat)

@@ -3,7 +3,7 @@
 !-- Find matrix inverse from numerical recipes
 subroutine MATRIXINV(c,n)
 
-      parameter (nb=3)
+      parameter (nb=4)
       dimension c(nb,nb),indx(nb),y(nb,nb)
 
       DO I=1,n
@@ -30,7 +30,7 @@ END subroutine MATRIXINV
 
 
 SUBROUTINE LUDCMP(C,N,INDX,D)
-      parameter (nb=3,tiny=1.e-20)
+      parameter (nb=4,tiny=1.e-20)
       DIMENSION C(nb,nb),INDX(nb),VV(nb)
 
       D=1.0
@@ -99,7 +99,7 @@ END SUBROUTINE LUDCMP
 
 
 SUBROUTINE LUBKSB(a,n,indx,b)
-      parameter (nb=3)
+      parameter (nb=4)
       dimension indx(nb),b(nb),a(nb,nb)
       real sum
 
