@@ -1,27 +1,25 @@
  program ReadNsta
     implicit none
     character(len = 100) :: line, elev_str, lat_str, lon_str
+    character(len = 100) :: data_filename
     
     integer :: n, m, i
     integer :: io_status, unit_num
 
-    real, allocatable :: EQ_X(:), EQ_Y(:), EQ_Z(:), EQ_M(:)
+    real, allocatable :: STATION_X(:), STATION_Y(:), STATION_Z(:)
     real :: lat_deg, lat_min, lon_deg, lon_min
 
-    open(newunit=unit_num, file="../data/nsta.dat", status="old", action="read")
-    m = 0
-    do
-        read(unit_num, '(A)', iostat=io_status) line
-        if (io_status /= 0) exit
-        m = m + 1
-    end do
-    close(unit_num)
+
+    data_filename = "../data/nsta.dat"
 
 
-    allocate(EQ_X(m), EQ_Y(m), EQ_Z(m))
+    ! Count the number of lines.
+    call CountLines(data_filename, m)
+    allocate(STATION_X(m), STATION_Y(m), STATION_Z(m))
 
 
-    open(newunit=unit_num, file="../data/nsta.dat", status="old", action="read")
+    ! Read data (lat, lon)
+    open(newunit=unit_num, file = data_filename, status = "old", action = "read")
     do i = 1, m
         read(unit_num, '(A)', iostat=io_status) line
         if (io_status /= 0) exit
@@ -30,20 +28,20 @@
         read(lat_str(1:2), *) lat_deg
         read(lat_str(3:7), *) lat_min
 
-        EQ_Y(i) = lat_deg + lat_min / 60.0
+        STATION_Y(i) = lat_deg + lat_min / 60.0
 
-        lon_str = line(14:22)
+        lon_str = line(13:22)
         read(lon_str(1:3), *) lon_deg
         read(lon_str(4:8), *) lon_min
 
-        EQ_X(i) = lon_deg + lon_min / 60.0
+        STATION_X(i) = lon_deg + lon_min / 60.0
 
-        elev_str = line(24:28)
-        if (trim(elev_str) == '') then
-            EQ_Z(i) = 0.0
-        else
-            read(elev_str, *) EQ_Z(i)
-        end if
+        ! elev_str = line(24:28)
+        ! if (trim(elev_str) == '') then
+        !     EQ_Z(i) = 0.0
+        ! else
+        !     read(elev_str, *) EQ_Z(i)
+        ! end if
 
     end do
     close(unit_num)
@@ -52,5 +50,5 @@
 
 
 
-    deallocate(EQ_X, EQ_Y, EQ_Z)
+    deallocate(STATION_X, STATION_Y, STATION_Z)
 end program ReadNsta
