@@ -1,0 +1,4 @@
+GetTravelTime|code/GetTravelTime.f90 code/CountLines.f90
+GPSLocating|code/GPSLocating.f90 code/CountLines.f90 code/matinv.f90 code/delaz.f90
+ReadNsta|code/ReadNsta.f90 code/CountLines.f90 code/delaz.f90
+InverseTest|code/InverseTest.f90 code/InverseMatrix.f90|-Wl,-framework,Accelerate
